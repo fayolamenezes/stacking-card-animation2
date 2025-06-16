@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3D Stack – Smooth Slide</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      font-family: sans-serif;
+      overflow-x: hidden;
+    }
+
+    .spacer {
+      height: 100vh;
+    }
+
+    .stack-container {
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      perspective: 1500px;
+      background: #111;
+    }
+
+    .card {
+      position: absolute;
+      width: 600px;
+      height: 300px;
+      background: linear-gradient(135deg, #ff6f91, #3c0a4d);
+      border-radius: 20px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      transform-origin: bottom center;
+      transform-style: preserve-3d;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      border: 2px solid #fff3;
+    }
+
+    .scroll-space {
+      height: 800vh;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="spacer"></div>
+
+  <div class="stack-container">
+    <div class="card">Card 1</div>
+    <div class="card">Card 2</div>
+    <div class="card">Card 3</div>
+    <div class="card">Card 4</div>
+    <div class="card">Card 5</div>
+    <div class="card">Card 6</div>
+    <div class="card">Card 7</div>
+    <div class="card">Card 8</div>
+  </div>
+
+  <div class="scroll-space"></div>
+
+  <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const cards = gsap.utils.toArray(".card");
+    const maxVisible = 3;
+    const spacing = 40;
+    const entryY = 1000;
+    const tiltAngle = -10;
+    const scaleSteps = [1, 0.94, 0.88];
+
+    cards.forEach((card, i) => {
+      gsap.set(card, {
+        y: entryY,
+        rotateX: tiltAngle,
+        scale: 1,
+        opacity: 0,
+        zIndex: i
+      });
+    });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: ".stack-container",
+        start: "top top",
+        end: "+=5000",
+        scrub: true,
+        pin: true,
+        anticipatePin: 1
+      }
+    });
+
+    cards.forEach((card, i) => {
+      const startTime = i * 0.5;
+
+      tl.set(card, {
+        opacity: 1,
+        scale: scaleSteps[0]
+      }, startTime);
+
+      tl.to(card, {
+        rotateX: 0,
+        y: (maxVisible - 1) * spacing,
+        scale: scaleSteps[0],
+        duration: 0.6,
+        ease: "power2.out"
+      }, startTime);
+
+      for (let j = Math.max(0, i - (maxVisible - 1)); j < i; j++) {
+        const depth = i - j;
+        if (depth < scaleSteps.length) {
+          tl.to(cards[j], {
+            y: `-=${spacing}`,
+            scale: scaleSteps[depth],
+            duration: 0.4,
+            ease: "power1.out"
+          }, startTime);
+        }
+      }
+
+      if (i >= maxVisible) {
+        const fadeOutCard = cards[i - maxVisible];
+        tl.to(fadeOutCard, {
+          opacity: 0,
+          duration: 0.2,
+          ease: "power1.out"
+        }, startTime + 0.2);
+      }
+    });
+  </script>
+</body>
+</html>
