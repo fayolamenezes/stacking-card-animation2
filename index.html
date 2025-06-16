@@ -25,12 +25,17 @@
       position: relative;
       perspective: 1500px;
       background: #111;
+      padding: 1rem;
+      box-sizing: border-box;
+      overflow: hidden;
     }
 
     .card {
       position: absolute;
-      width: 600px;
-      height: 300px;
+      width: 90vw;
+      max-width: 600px;
+      height: 45vw;
+      max-height: 300px;
       background: linear-gradient(135deg, #ff6f91, #3c0a4d);
       border-radius: 20px;
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
@@ -41,12 +46,42 @@
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 4vw, 2rem);
       border: 2px solid #fff3;
+      text-align: center;
+      padding: 1rem;
     }
 
     .scroll-space {
       height: 800vh;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        width: 80vw;
+        max-width: 450px;
+        height: 60vw;
+        max-height: 300px;
+        font-size: 1.2rem;
+      }
+
+      .scroll-space {
+        height: 400vh;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        width: 90vw;
+        max-width: 300px;
+        height: 65vw;
+        max-height: 250px;
+        font-size: 1rem;
+      }
+
+      .scroll-space {
+        height: 300vh;
+      }
     }
   </style>
 </head>
@@ -89,11 +124,21 @@
       });
     });
 
+    const isMobile = window.innerWidth <= 480;
+    const isTablet = window.innerWidth <= 768;
+    let scrollDistance = 5000;
+
+    if (isMobile) {
+      scrollDistance = 2500;
+    } else if (isTablet) {
+      scrollDistance = 3500;
+    }
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: ".stack-container",
         start: "top top",
-        end: "+=5000",
+        end: `+=${scrollDistance}`,
         scrub: true,
         pin: true,
         anticipatePin: 1
