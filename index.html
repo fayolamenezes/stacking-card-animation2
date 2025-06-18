@@ -7,7 +7,7 @@
   <style>
     body {
       margin: 0;
-      background: #111;
+      background: #000;
       font-family: sans-serif;
       overflow-x: hidden;
     }
@@ -20,18 +20,49 @@
       height: 100vh;
       width: 100%;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       position: relative;
       perspective: 1500px;
-      background: #111;
+      background: #000;
       padding: 1rem;
       box-sizing: border-box;
       overflow: hidden;
     }
 
+    .column-table {
+      display: grid;
+      margin-top: 2rem;
+      grid-template-columns: repeat(8, 1fr); 
+      width: 100vw;
+      background-color: #000;
+      border-top: 1px solid #555;
+      border-bottom: 1px solid #555;
+      z-index: 1000;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .column {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-left: 1px solid #555;
+      user-select: none;
+    }
+
+    .column:first-child {
+      border-left: none;
+    }
+    
     .card {
       position: absolute;
+      margin-top: 6rem;
       width: 90vw;
       max-width: 600px;
       height: 45vw;
@@ -90,6 +121,17 @@
   <div class="spacer"></div>
 
   <div class="stack-container">
+    <div class="column-table">
+      <div class="column" data-index="0">1</div>
+      <div class="column" data-index="1">2</div>
+      <div class="column" data-index="2">3</div>
+      <div class="column" data-index="3">4</div>
+      <div class="column" data-index="4">5</div>
+      <div class="column" data-index="5">6</div>
+      <div class="column" data-index="6">7</div>
+      <div class="column" data-index="7">8</div>
+    </div>
+
     <div class="card">Card 1</div>
     <div class="card">Card 2</div>
     <div class="card">Card 3</div>
@@ -104,10 +146,14 @@
 
   <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
   <script src="https://unpkg.com/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/gsap@3.12.2/dist/ScrollToPlugin.min.js"></script>
+
   <script>
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
     const cards = gsap.utils.toArray(".card");
+    const columns = document.querySelectorAll(".column");
+
     const maxVisible = 3;
     const spacing = 40;
     const entryY = 1000;
@@ -134,26 +180,27 @@
       scrollDistance = 3500;
     }
 
-    const tl = gsap.timeline({
+    const scrollTween = gsap.timeline({
       scrollTrigger: {
         trigger: ".stack-container",
         start: "top top",
         end: `+=${scrollDistance}`,
         scrub: true,
         pin: true,
-        anticipatePin: 1
+        anticipatePin: 1,
+        id: "stackPin"
       }
     });
 
     cards.forEach((card, i) => {
       const startTime = i * 0.5;
 
-      tl.set(card, {
+      scrollTween.set(card, {
         opacity: 1,
         scale: scaleSteps[0]
       }, startTime);
 
-      tl.to(card, {
+      scrollTween.to(card, {
         rotateX: 0,
         y: (maxVisible - 1) * spacing,
         scale: scaleSteps[0],
@@ -164,7 +211,7 @@
       for (let j = Math.max(0, i - (maxVisible - 1)); j < i; j++) {
         const depth = i - j;
         if (depth < scaleSteps.length) {
-          tl.to(cards[j], {
+          scrollTween.to(cards[j], {
             y: `-=${spacing}`,
             scale: scaleSteps[depth],
             duration: 0.4,
@@ -175,13 +222,33 @@
 
       if (i >= maxVisible) {
         const fadeOutCard = cards[i - maxVisible];
-        tl.to(fadeOutCard, {
+        scrollTween.to(fadeOutCard, {
           opacity: 0,
           duration: 0.2,
           ease: "power1.out"
         }, startTime + 0.2);
       }
     });
+
+    columns.forEach(column => {
+      column.addEventListener("click", () => {
+        const index = parseInt(column.dataset.index);
+        const duration = scrollTween.duration();
+        const targetTime = (index + 1) * 0.5 - 0.001;
+        const targetProgress = targetTime / duration;
+
+        const scrollTrigger = ScrollTrigger.getById("stackPin");
+        const totalScroll = scrollTrigger.end - scrollTrigger.start;
+        const scrollY = scrollTrigger.start + targetProgress * totalScroll;
+
+        gsap.to(window, {
+          scrollTo: scrollY,
+          duration: 1,
+          ease: "power2.inOut"
+        });
+      });
+    });
+
   </script>
 </body>
 </html>
