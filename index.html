@@ -59,6 +59,51 @@
     .column:first-child {
       border-left: none;
     }
+
+    @media (max-width: 768px) {
+      .column-table {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+        padding: 0;
+        margin: 2rem 0;
+        border-top: 1px solid #555;
+        border-bottom: 1px solid #555;
+        scrollbar-width: thin;
+      }
+
+      .column {
+        flex: 0 0 auto;
+        min-width: 80px;
+        border-left: 1px solid #555;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .column:first-child {
+        border-left: none;
+      }
+
+      .column-table::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .column-table::-webkit-scrollbar-thumb {
+        background-color: #444;
+        border-radius: 3px;
+      }
+
+      .column-table::-webkit-scrollbar-track {
+        background: #000;
+      }
+    }
     
     .card {
       position: absolute;
